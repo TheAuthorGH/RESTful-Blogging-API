@@ -15,7 +15,6 @@ function validateObj(obj, requiredFields) {
 }
 
 router.get('/', (req, res) => {
-	console.log('HERE!');
 	res.json(BlogPosts.get());
 });
 
