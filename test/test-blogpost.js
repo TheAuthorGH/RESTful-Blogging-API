@@ -11,6 +11,7 @@ const modelPost = {
 	publishDate: '8/24/2018'
 }
 
+
 describe('BlogPost API', function() {
 	before(startServer);
 	after(stopServer);
@@ -21,6 +22,10 @@ describe('BlogPost API', function() {
 			.get('/blog-posts')
 			.then(function(res) {
 				expect(res).to.have.status(200);
+				expect(res).to.be.json;
+				expect(res.body).to.be.a('array');
+				for(let i of res.body)
+					expect(i).to.include.keys(['id', 'title', 'content', 'author', 'publishDate']);
 			});
 	});
 
@@ -31,6 +36,9 @@ describe('BlogPost API', function() {
 			.send(Object.create(modelPost))
 			.then(function(res) {
 				expect(res).to.have.status(201);
+				expect(res).to.be.json;
+				expect(res.body).to.be.a('object');
+				expect(res.body).to.include.keys(['id', 'title', 'content', 'author', 'publishDate']);
 			})
 	});
 
