@@ -23,4 +23,35 @@ app.get('/', (req, res) => {
 const bloggingRouter = require('./bloggingRouter');
 app.use('/blog-posts', bloggingRouter);
 
-app.listen(8080, () => console.log('Blogging API listening on port ' + 8080));
+let server;
+
+function startServer() {
+	return new Promise((resolve, reject) => {
+		const port = process.env.PORT || 8080;
+		server = app
+			.listen(port, () => { 
+				console.log('Blogging API listening on port ' + port); 
+				resolve(server);
+			})
+			.on('error', err => {
+				console.log(err);
+				reject(err);
+			});
+	});
+}
+
+function stopServer() {
+	return new Promise((resolve, reject) => {
+		server.close(err => {
+			if(err)
+				reject(err);
+			else
+				resolve();
+		});
+	});
+}
+
+if(require.main === module)
+	startServer().catch(e => console.log(err));
+
+module.exports = {app, startServer, stopServer};
