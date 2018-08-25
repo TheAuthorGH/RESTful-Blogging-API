@@ -1,2 +1,8 @@
 language: node_js
 node_js: node
+deploy:
+  provider: heroku
+  api_key: ''
+  app: shielded-reaches-91917
+  on:
+    repo: TheAuthorGH/RESTful-Blogging-API
