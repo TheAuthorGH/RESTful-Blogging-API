@@ -60,6 +60,6 @@ function stopServer() {
 }
 
 if(require.main === module)
-	startServer(DATABASE_URL).catch(e => console.log(err));
+	startServer(DATABASE_URL).catch(e => console.log(e));
 
 module.exports = {app, startServer, stopServer};
