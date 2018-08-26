@@ -11,7 +11,6 @@ const modelPost = {
 	publishDate: '8/24/2018'
 }
 
-
 describe('BlogPost API', function() {
 	before(startServer);
 	after(stopServer);
@@ -39,7 +38,7 @@ describe('BlogPost API', function() {
 				expect(res).to.be.json;
 				expect(res.body).to.be.a('object');
 				expect(res.body).to.include.keys(['id', 'title', 'content', 'author', 'publishDate']);
-			})
+			});
 	});
 
 	it('should delete blog post on DELETE', function() {
