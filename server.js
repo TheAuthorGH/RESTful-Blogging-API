@@ -1,10 +1,12 @@
+'use strict';
+
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+const {PORT, DATABASE_URL} = require('./config');
 
-// Manage initial posts
-const BlogPosts = require('./model').BlogPosts;
-BlogPosts.create('model book', 'fiction', 'TheAuthor', '8/23/2018');
-BlogPosts.create('other model book', 'nonfiction', 'TheAuthor', '8/23/2018');
+// Persistence
+mongoose.Promise = global.Promise;
 
 // Logging
 app.use(require('morgan')('common'));
@@ -25,18 +27,22 @@ app.use('/blog-posts', bloggingRouter);
 
 let server;
 
-function startServer() {
+function startServer(dbUrl, port = PORT) {
 	return new Promise((resolve, reject) => {
-		const port = process.env.PORT || 8080;
-		server = app
-			.listen(port, () => { 
-				console.log('Blogging API listening on port ' + port); 
-				resolve(server);
-			})
-			.on('error', err => {
-				console.log(err);
-				reject(err);
-			});
+		mongoose.connect(dbUrl, err => {
+			if(err)
+				return reject(err);
+			server = app
+				.listen(port, () => { 
+					console.log('Blogging API listening on port ' + port); 
+					resolve(server);
+				})
+				.on('error', err => {
+					console.log(err);
+					mongoose.disconnect();
+					reject(err);
+				});
+		});
 	});
 }
 
@@ -45,13 +51,15 @@ function stopServer() {
 		server.close(err => {
 			if(err)
 				reject(err);
-			else
+			else {
 				resolve();
+				mongoose.disconnect();
+			}
 		});
 	});
 }
 
 if(require.main === module)
-	startServer().catch(e => console.log(err));
+	startServer(DATABASE_URL).catch(e => console.log(err));
 
 module.exports = {app, startServer, stopServer};

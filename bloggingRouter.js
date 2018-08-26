@@ -1,50 +1,77 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const jsonParser = require('body-parser').json();
 
 const BlogPosts = require('./model').BlogPosts;
 
-function validateObj(obj, requiredFields) {
-	if(!obj || !requiredFields)
+// Util
+
+function handleError(e, res) {
+	console.log(e);
+	res.status(500).send('Internal server error');
+}
+
+function objHasFields(obj, fields) {
+	if(!obj || !fields)
 		return false;
-	for(let f of requiredFields) {
+	for(let f of fields) {
 		if(obj[f] === undefined)
 			return false;
 	}
 	return true;
 }
 
+// Functions
+
 router.get('/', (req, res) => {
-	res.json(BlogPosts.get());
+	BlogPosts.find()
+		.then(posts => {
+			res.json({
+				blogPosts: posts.map(p => p.serialize())
+			});
+		})
+		.catch(e => handleError(e, res));
+});
+
+router.get('/:id', (req, res) => {
+	BlogPosts.findById(req.params.id)
+		.then(post => {
+			if(post)
+				res.json(post.serialize());
+			else
+				res.status(404).send('Post not found.');
+		})
+		.catch(e => handleError(e, res));
 });
 
 router.post('/', jsonParser, (req, res) => {
-	const post = req.body;
-	if(validateObj(post, ['title', 'content', 'author', 'publishDate']))
-		res.status(201).json(BlogPosts.create(post.title, post.content, post.author, post.publishDate));
+	if(!objHasFields(req.body, ['title', 'author', 'content']) 
+		|| !objHasFields(req.body.author, ['firstName', 'lastName']))
+		res.status(400).send('invalid post data.');
 	else
-		res.status(400).send('Invalid blog post!');
-});
-
-router.delete('/:id', (req, res) => {
-	BlogPosts.delete(req.params.id);
-	res.status(204).end();
+		BlogPosts.create(req.body)
+			.then(p => res.status(201).json(p.serialize()));
 });
 
 router.put('/:id', jsonParser, (req, res) => {
-	const post = req.body;
-	if(validateObj(post, ['title', 'content', 'author', 'publishDate', 'id'])) {
-		if(req.params.id != post.id)
-			res.status(400).send("Post ids don't match!");
-		try {
-			BlogPosts.update(post);
-		} catch(e) {
-			res.status(404).send('Post id not found.');
-		}
-		res.status(204).end();
-	} else {
-		res.status(400).send('Invalid blog post!');
-	}
+	if(!req.body.id || req.params.id != req.body.id)
+		res.status(400).send('invalid id information!');
+	const updatable = ['title', 'author', 'content'];
+	let toUpdate = {};
+	for(let i of Object.keys(req.body))
+		if(updatable.includes(i))
+			toUpdate[i] = req.body[i];
+	BlogPosts.findByIdAndUpdate(req.body.id, {$set: toUpdate})
+		.then(p => res.status(200).json(p))
+		.catch(e => handleError(e, res));
+})
+
+router.delete('/:id', (req, res) => {
+	BlogPosts.findByIdAndRemove(req.params.id)
+		.then(() => res.status(204).end())
+		.catch(e => handleError(e, res));
 });
 
 module.exports = router;
