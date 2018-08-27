@@ -21,9 +21,11 @@ app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
-// Main Router
-const bloggingRouter = require('./bloggingRouter');
-app.use('/blog-posts', bloggingRouter);
+// Routers
+const postRouter = require('./router-posts');
+const authorRouter = require('./router-authors');
+app.use('/posts', postRouter);
+app.use('/authors', authorRouter);
 
 let server;
 
