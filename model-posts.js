@@ -30,6 +30,7 @@ postSchema.methods.serialize = function(comments = false) {
 		id: this._id,
 		title: this.title,
 		author: this.authorString,
+		content: this.content,
 		created: "1481322758429" // hardcoded, not a real value
 	};
 	if(comments)

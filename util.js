@@ -1,5 +1,5 @@
 function handleError(e, res) {
-	console.log(e);
+	console.error(e);
 	res.status(500).send('Internal server error');
 }
 

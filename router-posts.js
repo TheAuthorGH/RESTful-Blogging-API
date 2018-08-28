@@ -54,8 +54,10 @@ router.post('/', jsonParser, (req, res) => {
 });
 
 router.put('/:id', jsonParser, (req, res) => {
-	if(!req.body.id || req.params.id != req.body.id)
+	if(!req.body.id || req.params.id != req.body.id) {
 		res.status(400).send('invalid id information!');
+		return;
+	}
 	const updatable = ['title', 'content'];
 	let toUpdate = {};
 	for(let i of Object.keys(req.body))
@@ -64,7 +66,7 @@ router.put('/:id', jsonParser, (req, res) => {
 	Posts.findByIdAndUpdate(req.body.id, {$set: toUpdate})
 		.then(p => res.status(200).json(p.serialize()))
 		.catch(e => handleError(e, res));
-})
+});
 
 router.delete('/:id', (req, res) => {
 	Posts.findByIdAndRemove(req.params.id)

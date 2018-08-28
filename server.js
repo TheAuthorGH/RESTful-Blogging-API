@@ -32,10 +32,12 @@ let server;
 function startServer(dbUrl, port = PORT) {
 	return new Promise((resolve, reject) => {
 		mongoose.connect(dbUrl, err => {
-			if(err)
+			if(err) {
+				console.log(err);
 				return reject(err);
+			}
 			server = app
-				.listen(port, () => { 
+				.listen(port, () => {
 					console.log('Blogging API listening on port ' + port); 
 					resolve(server);
 				})
